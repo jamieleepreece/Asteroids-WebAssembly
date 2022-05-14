@@ -1,0 +1,5 @@
+
+struct keystate
+{
+	struct key;
+};

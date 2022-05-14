@@ -5,40 +5,75 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "renderer.h"
 #include "player.h"
 #include "asteroids.h"
 #include "emscripten.h"
+// #include "keystate.h"
 
 #define ASTEROIDS 27
 #define LIVES 3
 
 int init(int width, int height);
 
-SDL_Window* window = NULL;			//The window we'll be rendering to
-SDL_Renderer *renderer;				//The renderer SDL will use to draw to the screen
-SDL_Texture *screen;				//The texture representing the screen	
-uint32_t* pixels = NULL;			//The pixel buffer to draw to
-struct asteroid asteroids[ASTEROIDS];		//The asteroids
-struct player p;				//The player
-struct player lives[LIVES];			//Player lives left
+SDL_Window* window = NULL;			  //The window we'll be rendering to
+SDL_Renderer *renderer;				  //The renderer SDL will use to draw to the screen
+SDL_Texture *screen;				  //The texture representing the screen	
+uint32_t* pixels = NULL;			  //The pixel buffer to draw to
+struct asteroid asteroids[ASTEROIDS]; //The asteroids
+struct player p;				      //The player
+struct player lives[LIVES];			  //Player lives left
+
+typedef enum { F, T } boolean;
+
+bool paused = F;
+
+// struct key_value
+// {
+//     // int key;
+//     char* name;
+//     bool* value;
+// };
+
+// struct key_value KV1;
+
+
+/* put */
+// g_hash_table_insert(table,"SOME_KEY","SOME_VALUE");
+
+// /* get */
+// gchar *value = (gchar *) g_hash_table_lookup(table,"SOME_KEY");
 
 void mainloop() {
 
-	int sleep = 0;
-	int quit = 0;
+	// int sleep = 0;
+	// int quit = 0;
 	SDL_Event event;
-	Uint32 next_game_tick = SDL_GetTicks();
+	// Uint32 next_game_tick = SDL_GetTicks();
   
 	//check for new events every frame
 	SDL_PumpEvents();
 
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	
-	if (state[SDL_SCANCODE_ESCAPE]) {
-	
-		quit = 1;
-	}
+	// printf("Hello World\n");
+	// return;
+
+	// printf(state[SDL_SCANCODE_ESCAPE]);
+
+	// if (state[SDL_SCANCODE_ESCAPE] && paused == F) {
+	// 	paused = T;
+	// }
+	// else if (state[SDL_SCANCODE_ESCAPE] && paused == T) {
+	// 	paused = F;
+	// }
+	// if (paused == T)
+	// {
+	// 	return;
+	// }
+
+
 		
 	if (state[SDL_SCANCODE_UP]) {
 
@@ -74,10 +109,45 @@ void mainloop() {
 
 						break; 
 				}
+
+			case SDL_KEYUP:
+
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+				{
+
+					printf( ", Name: %s\n", SDL_GetKeyName( event.key.keysym.sym ) );
+
+					// KV1.name = SDL_GetKeyName( event.key.keysym.sym );
+					// KV1.value = T
+
+					if (state[SDL_SCANCODE_ESCAPE] && paused == F) {
+						paused = T;
+						// KV1.name = SDL_GetKeyName( event.key.keysym.sym );
+						// KV1.value = T
+					}
+					else if (state[SDL_SCANCODE_ESCAPE] && paused == T) {
+						paused = F;
+					}
+					
+				}
+
+
+
 		}
 	}
 
+	if (paused == T)
+	{
+		return;
+	}
+
 	//draw to the pixel buffer
+	// clear_pixels(pixels, 0x00000000);
+	// draw_asteroids(pixels, asteroids, ASTEROIDS);
+	// update_player(&p);
+	// bounds_player(&p);
+	// bounds_asteroids(asteroids, ASTEROIDS);
+
 	clear_pixels(pixels, 0x00000000);
 	draw_player(pixels, &p);
 	draw_player(pixels, &lives[0]);
@@ -91,24 +161,46 @@ void mainloop() {
 	int res = collision_asteroids(asteroids, ASTEROIDS, &p.location, p.hit_radius);
 
 	if (res != -1) {
-		
+
 		p.lives--;
 		p.location.x = 0;
 		p.location.y = 0;
 		p.velocity.x = 0;
 		p.velocity.y = 0;
 
+		printf("Lives: %d\n", p.lives);
+
 		int i = LIVES - 1;
+
+
+		// lives[i].lives
 
 		for ( i = LIVES; i >= 0; i--) {
 			
-			if(lives[i].lives > 0) {
+			if(lives[(i - 1)].lives > 0) {
 				
-				lives[i].lives = 0;
+				lives[(i - 1)].lives = 0;
+				// printf("Lives: %d\n", lives[i].lives);
+				// 
+				// return;
 				break;
 			}
 		}
 	}
+
+	// clear_pixels(pixels, 0x00000000);
+	// draw_player(pixels, &p);
+	// draw_player(pixels, &lives[0]);
+	// draw_player(pixels, &lives[1]);
+	// draw_player(pixels, &lives[2]);
+	// update_player(&p);
+
+	// bounds_asteroids(asteroids, ASTEROIDS);
+	// draw_asteroids(pixels, asteroids, ASTEROIDS);
+	// update_player(&p);
+	// bounds_player(&p);
+	// bounds_asteroids(asteroids, ASTEROIDS);
+
 	
 	int i = 0;
 	struct vector2d translation = {-SCREEN_WIDTH / 2, -SCREEN_HEIGHT / 2};
@@ -156,18 +248,21 @@ void mainloop() {
 	// 	SDL_Delay(sleep);
 	// }
 
-	if(quit == 1) {
-		emscripten_cancel_main_loop();
+	// if(quit == 1) {
+		          				
+	// 	SDL_Delay(sleep);
 
-		//free the screen buffer
-		free(pixels);
+	// 	// emscripten_cancel_main_loop();
+
+	// 	// //free the screen buffer
+	// 	// free(pixels);
 		
-		//Destroy window 
-		SDL_DestroyWindow(window);
+	// 	// //Destroy window 
+	// 	// SDL_DestroyWindow(window);
 
-		//Quit SDL subsystems 
-		SDL_Quit(); 
-	}
+	// 	// //Quit SDL subsystems 
+	// 	// SDL_Quit(); 
+	// }
 
 
   	// Stop simulating the infinite loop

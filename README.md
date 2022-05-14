@@ -12,7 +12,7 @@ available to you operating systems PATH environment variable
 To compile for web assembly, run the following command, assuming you have emscripten installed
 
     emcc \
-        -o app.html asteroids/*.c \
+        -o app.html src/*.c \
         -Wall -g -lm \
         -s USE_SDL=2
 
